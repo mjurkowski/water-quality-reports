@@ -1,0 +1,55 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+model Report {
+  id           Int      @id @default(autoincrement())
+  uuid         String   @unique @default(uuid())
+  types        String[] // Array of problem types (multiple selection)
+  description  String?  @db.Text
+  latitude     Float
+  longitude    Float
+  address      String?  @db.VarChar(500)
+  city         String?  @db.VarChar(100)
+  voivodeship  String?  @db.VarChar(50)
+  postalCode   String?  @db.VarChar(10)
+  contactEmail String?  @db.VarChar(255)
+  reportedAt   DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  ipAddress    String?  @db.Inet
+  userAgent    String?  @db.Text
+  status       String   @default("active")
+  deleteToken  String?  @unique
+
+  // Relation to photos (one-to-many)
+  photos       Photo[]
+
+  @@index([types])
+  @@index([reportedAt])
+  @@index([createdAt])
+  @@index([city])
+  @@index([status])
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  url       String   @db.VarChar(500)
+  filename  String   @db.VarChar(255)
+  size      Int      // File size in bytes
+  mimeType  String   @db.VarChar(50)
+  createdAt DateTime @default(now())
+
+  // Foreign key to Report
+  reportId  Int
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+}

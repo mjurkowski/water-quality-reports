@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output/
+
+# Build outputs
+website/dist/
+admin/dist/
+api/dist/
+build/
+
+# Environment variables
+.env
+.env*.local
+.env.production
+website/.env
+admin/.env
+api/.env
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Uploads
+api/uploads/*
+!api/uploads/.gitkeep
+
+# Database
+*.db
+*.sqlite
+
+# PM2
+api/logs/
+.pm2/
+
+# Generated files
+website/src/lib/api/generated/
+admin/src/lib/api/generated/
+api/openapi/openapi.yaml
+
+# Misc
+.cache/

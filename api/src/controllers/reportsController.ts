@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { reportService } from '@/services/reportService';
-import { logger } from '@/utils/logger';
 
 export const reportsController = {
   async getAll(req: Request, res: Response, next: NextFunction) {

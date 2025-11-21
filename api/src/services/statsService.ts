@@ -44,8 +44,8 @@ export const statsService = {
 
     // Count by type (flatten array and count)
     const typeCount: Record<string, number> = {};
-    allReports.forEach(report => {
-      report.types.forEach(type => {
+    allReports.forEach((report: { types: string[] }) => {
+      report.types.forEach((type: string) => {
         typeCount[type] = (typeCount[type] || 0) + 1;
       });
     });
@@ -97,11 +97,11 @@ export const statsService = {
       total: totalReports,
       recentCount: recentReports,
       byType: typeCount,
-      byCity: cityStats.map(s => ({
+      byCity: cityStats.map((s: { city: string | null; _count: number }) => ({
         city: s.city,
         count: s._count,
       })),
-      byVoivodeship: voivodeshipStats.map(s => ({
+      byVoivodeship: voivodeshipStats.map((s: { voivodeship: string | null; _count: number }) => ({
         voivodeship: s.voivodeship,
         count: s._count,
       })),

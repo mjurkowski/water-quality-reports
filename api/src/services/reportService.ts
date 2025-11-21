@@ -1,5 +1,4 @@
 import { prisma } from '@/db/client';
-import { Prisma } from '@prisma/client';
 import { savePhoto } from '@/utils/photo';
 import { geocodeService } from './geocodeService';
 import { randomUUID } from 'crypto';
@@ -31,7 +30,8 @@ interface CreateReportData {
 
 export const reportService = {
   async getAll(filters: ReportFilters) {
-    const where: Prisma.ReportWhereInput = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {
       status: 'active',
     };
 

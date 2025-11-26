@@ -3,6 +3,31 @@ import { prisma } from '@/db/client';
 
 const router = Router();
 
+/**
+ * @openapi
+ * /health:
+ *   get:
+ *     summary: Health check endpoint
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthResponse'
+ *       503:
+ *         description: Service is unhealthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/HealthResponse'
+ *                 - type: object
+ *                   properties:
+ *                     error:
+ *                       type: string
+ */
 router.get('/', async (req: Request, res: Response) => {
   try {
     // Test database connection

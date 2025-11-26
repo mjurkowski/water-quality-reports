@@ -3,9 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import path from 'path';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config/app';
 import { errorHandler } from './middleware/errorHandler';
 import router from './routes';
+import { swaggerSpec } from './config/swagger';
 
 const app = express();
 
@@ -25,6 +27,18 @@ app.use(compression());
 
 // Serve uploaded files
 app.use('/uploads', express.static(config.uploadDir));
+
+// Swagger UI documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Cola z Kranu API Docs',
+}));
+
+// OpenAPI JSON spec
+app.get('/openapi.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 // API routes
 app.use('/api', router);

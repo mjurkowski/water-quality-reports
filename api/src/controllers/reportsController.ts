@@ -60,4 +60,56 @@ export const reportsController = {
       next(error);
     }
   },
+
+  // Admin-only methods
+  async getAllAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const filters = req.query;
+      const result = await reportService.getAllAdmin(filters);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getByIdAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { uuid } = req.params;
+      const report = await reportService.getByIdAdmin(uuid);
+
+      if (!report) {
+        return res.status(404).json({ error: 'Report not found' });
+      }
+
+      res.json(report);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async updateStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { uuid } = req.params;
+      const { status } = req.body;
+
+      if (!['active', 'deleted', 'spam'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status. Must be: active, deleted, or spam' });
+      }
+
+      const report = await reportService.updateStatus(uuid, status);
+      res.json(report);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async deleteAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { uuid } = req.params;
+      await reportService.deleteAdmin(uuid);
+      res.json({ message: 'Report permanently deleted' });
+    } catch (error) {
+      next(error);
+    }
+  },
 };

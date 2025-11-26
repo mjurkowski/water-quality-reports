@@ -222,4 +222,186 @@ export const reportService = {
       data: { status: 'deleted' },
     });
   },
+
+  // Admin methods
+  async getAllAdmin(filters: any) {
+    const where: any = {};
+
+    // Admin can see all statuses unless filtered
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    // Parse bounds (minLat,minLng,maxLat,maxLng)
+    if (filters.bounds) {
+      const [minLat, minLng, maxLat, maxLng] = filters.bounds.split(',').map(Number);
+      where.AND = [
+        { latitude: { gte: minLat, lte: maxLat } },
+        { longitude: { gte: minLng, lte: maxLng } },
+      ];
+    }
+
+    // Filter by types (array overlap)
+    if (filters.type) {
+      const types = Array.isArray(filters.type) ? filters.type : [filters.type];
+      where.types = { hasSome: types };
+    }
+
+    // Filter by date range
+    if (filters.startDate || filters.endDate) {
+      where.reportedAt = {};
+      if (filters.startDate) {
+        where.reportedAt.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        where.reportedAt.lte = new Date(filters.endDate);
+      }
+    }
+
+    // Filter by city
+    if (filters.city) {
+      where.city = filters.city;
+    }
+
+    const limit = filters.limit ? Math.min(parseInt(filters.limit, 10), 1000) : 1000;
+
+    const reports = await prisma.report.findMany({
+      where,
+      orderBy: { reportedAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        uuid: true,
+        types: true,
+        description: true,
+        latitude: true,
+        longitude: true,
+        address: true,
+        city: true,
+        voivodeship: true,
+        postalCode: true,
+        contactEmail: true,
+        reportedAt: true,
+        createdAt: true,
+        updatedAt: true,
+        status: true,
+        ipAddress: true,
+        userAgent: true,
+        photos: {
+          select: {
+            id: true,
+            url: true,
+            filename: true,
+            size: true,
+            mimeType: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    return {
+      reports,
+      total: reports.length,
+    };
+  },
+
+  async getByIdAdmin(uuid: string) {
+    return await prisma.report.findUnique({
+      where: { uuid },
+      select: {
+        id: true,
+        uuid: true,
+        types: true,
+        description: true,
+        latitude: true,
+        longitude: true,
+        address: true,
+        city: true,
+        voivodeship: true,
+        postalCode: true,
+        contactEmail: true,
+        reportedAt: true,
+        createdAt: true,
+        updatedAt: true,
+        status: true,
+        ipAddress: true,
+        userAgent: true,
+        deleteToken: true,
+        photos: {
+          select: {
+            id: true,
+            url: true,
+            filename: true,
+            size: true,
+            mimeType: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+  },
+
+  async updateStatus(uuid: string, status: string) {
+    const report = await prisma.report.findUnique({
+      where: { uuid },
+    });
+
+    if (!report) {
+      throw new Error('Report not found');
+    }
+
+    return await prisma.report.update({
+      where: { uuid },
+      data: { status },
+      select: {
+        id: true,
+        uuid: true,
+        types: true,
+        description: true,
+        latitude: true,
+        longitude: true,
+        address: true,
+        city: true,
+        voivodeship: true,
+        postalCode: true,
+        contactEmail: true,
+        reportedAt: true,
+        createdAt: true,
+        updatedAt: true,
+        status: true,
+        photos: {
+          select: {
+            id: true,
+            url: true,
+            filename: true,
+            size: true,
+            mimeType: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+  },
+
+  async deleteAdmin(uuid: string) {
+    const report = await prisma.report.findUnique({
+      where: { uuid },
+      include: { photos: true },
+    });
+
+    if (!report) {
+      throw new Error('Report not found');
+    }
+
+    // Hard delete - delete photos first (cascade should handle this, but being explicit)
+    await prisma.photo.deleteMany({
+      where: { reportId: report.id },
+    });
+
+    // Delete report
+    await prisma.report.delete({
+      where: { uuid },
+    });
+  },
 };
